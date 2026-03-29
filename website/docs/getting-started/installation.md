@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: "Installation"
-description: "Install Hermes Agent on Linux, macOS, or WSL2"
+description: "Install Hermes Agent on Linux, macOS, Windows, or WSL2"
 ---
 
 # Installation
@@ -16,9 +16,13 @@ Get Hermes Agent up and running in under two minutes with the one-line installer
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
 ```
 
-:::warning Windows
-Native Windows is **not supported**. Please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and run Hermes Agent from there. The install command above works inside WSL2.
-:::
+### Windows (Native)
+
+Open Command Prompt or PowerShell and run:
+
+```cmd
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.bat -o install.bat && install.bat && del install.bat
+```
 
 ### What the Installer Does
 

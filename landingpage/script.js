@@ -8,7 +8,7 @@ const PLATFORMS = {
     command:
       "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash",
     prompt: "$",
-    note: "Works on Linux, macOS & WSL2 · No prerequisites · Installs everything automatically",
+    note: "Works natively on Linux, macOS, Windows & WSL2 · No prerequisites · Installs everything automatically",
     stepNote:
       "Installs uv, Python 3.11, clones the repo, sets up everything. No sudo needed.",
   },
