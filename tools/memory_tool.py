@@ -23,6 +23,14 @@ Design:
 - Frozen snapshot pattern: system prompt is stable, tool responses show live state
 """
 
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
+try:
+    import msvcrt
+except ImportError:
+    msvcrt = None
 import json
 import logging
 import os
@@ -132,20 +140,27 @@ class MemoryStore:
         """
         lock_path = path.with_suffix(path.suffix + ".lock")
         lock_path.parent.mkdir(parents=True, exist_ok=True)
-        fd = open(lock_path, "w")
+        # On Windows, msvcrt.locking needs the file to have content
+        if msvcrt and (not lock_path.exists() or lock_path.stat().st_size == 0):
+            lock_path.write_text(" ", encoding="utf-8")
+
+        fd = open(lock_path, "r+" if msvcrt else "a+")
         try:
-            try:
-                import fcntl
-                fcntl.flock(fd, fcntl.LOCK_EX)
-            except (ImportError, NotImplementedError):
-                pass
+            if fcntl:
+                fcntl.flock(fd.fileno(), fcntl.LOCK_EX)
+            elif msvcrt:
+                fd.seek(0)
+                msvcrt.locking(fd.fileno(), msvcrt.LK_LOCK, 1)
             yield
         finally:
-            try:
-                import fcntl
-                fcntl.flock(fd, fcntl.LOCK_UN)
-            except (ImportError, NotImplementedError):
-                pass
+            if fcntl:
+                fcntl.flock(fd.fileno(), fcntl.LOCK_UN)
+            elif msvcrt:
+                try:
+                    fd.seek(0)
+                    msvcrt.locking(fd.fileno(), msvcrt.LK_UNLCK, 1)
+                except (OSError, IOError):
+                    pass
             fd.close()
 
     @staticmethod
