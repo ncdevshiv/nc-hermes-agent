@@ -228,24 +228,8 @@ function Test-Node {
 
     Write-Info "Node.js not found — installing Node.js $NodeVersion LTS..."
 
-    # Try winget first (cleanest on modern Windows)
-    if (Get-Command winget -ErrorAction SilentlyContinue) {
-        Write-Info "Installing via winget..."
-        try {
-            winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
-            # Refresh PATH
-            $env:Path = [Environment]::GetEnvironmentVariable("Path", "User") + ";" + [Environment]::GetEnvironmentVariable("Path", "Machine")
-            if (Get-Command node -ErrorAction SilentlyContinue) {
-                $version = node --version
-                Write-Success "Node.js $version installed via winget"
-                $script:HasNode = $true
-                return $true
-            }
-        } catch { }
-    }
-
-    # Fallback: download binary zip to ~/.hermes/node/
-    Write-Info "Downloading Node.js $NodeVersion binary..."
+    # Force portable node.js install locally (do not use winget) to keep things portable
+    Write-Info "Downloading Node.js $NodeVersion binary for portable installation..."
     try {
         $arch = if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "x86" }
         $indexUrl = "https://nodejs.org/dist/latest-v${NodeVersion}.x/"

@@ -179,7 +179,7 @@
             </div>
           </div>
           <p class="install-note" id="install-note">
-            Works on Linux, macOS & WSL2 · No prerequisites · Installs
+            Works natively on Linux, macOS, Windows & WSL2 · No prerequisites · Installs
             everything automatically
           </p>
         </div>
@@ -243,6 +243,20 @@
                   </button>
                 </div>
                 <pre><code id="step1-command">curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash</code></pre>
+              </div>
+              <div class="code-block" style="margin-top: 1rem;">
+                <div class="code-header">
+                  <span class="code-os" id="step1-os-win">Windows (Native)</span>
+                  <button
+                    class="code-copy"
+                    id="step1-copy-win"
+                    onclick="copyText(this)"
+                    data-text="curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.bat -o install.bat && install.bat && del install.bat"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre><code id="step1-command-win">curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.bat -o install.bat && install.bat && del install.bat</code></pre>
               </div>
               <p class="step-note" id="step1-note">
                 Installs uv, Python 3.11, clones the repo, sets up everything.

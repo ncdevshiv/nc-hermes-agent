@@ -30,7 +30,13 @@ Set your provider with `hermes model` or by editing `~/.hermes/.env`. See the [E
 
 ### Does it work on Windows?
 
-**Not natively.** Hermes Agent requires a Unix-like environment. On Windows, install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and run Hermes from inside it. The standard install command works perfectly in WSL2:
+**Yes.** Hermes Agent works natively on Windows. Open Command Prompt or PowerShell and run:
+
+```cmd
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.bat -o install.bat && install.bat && del install.bat
+```
+
+Alternatively, you can install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and run the Linux installer from inside it:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
