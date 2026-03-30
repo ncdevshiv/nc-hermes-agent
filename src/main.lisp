@@ -1,5 +1,5 @@
 (defpackage :nc-hermes-agent.main
-  (:use :cl :nc-hermes-agent.config :nc-hermes-agent.agent)
+  (:use :cl :nc-hermes-agent.config :nc-hermes-agent.agent :nc-hermes-agent.gateway :nc-hermes-agent.cli)
   (:export :main))
 (in-package :nc-hermes-agent.main)
 
@@ -15,13 +15,16 @@
 
 (defun main ()
   "Entry point for the compiled executable."
+  (parse-args (uiop:command-line-arguments))
   (format t "Initializing Hermes Lisp Agent...~%")
   (load-system-config)
   (start-agent)
+  (start-gateway)
   (format t "Press Ctrl+C to exit.~%")
   (handler-case
       (loop (sleep 1))
     (sb-sys:interactive-interrupt ()
       (stop-agent)
+      (stop-gateway)
       (format t "~%Shutting down gracefully.~%")
       (uiop:quit 0))))

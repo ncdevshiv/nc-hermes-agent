@@ -1,35 +1,34 @@
 {
-  description = "Hermes Agent - AI agent framework by Nous Research";
+  description = "Hermes Agent - Common Lisp rewrite";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
-    pyproject-nix = {
-      url = "github:pyproject-nix/pyproject.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    uv2nix = {
-      url = "github:pyproject-nix/uv2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    pyproject-build-systems = {
-      url = "github:pyproject-nix/build-system-pkgs";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+  outputs = { self, nixpkgs }:
+    let
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+      pkgsFor = system: import nixpkgs { inherit system; };
+    in {
+      devShells = forAllSystems (system:
+        let pkgs = pkgsFor system;
+        in {
+          default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              sbcl
+              rlwrap
+              openssl
+              git
+              curl
+            ];
 
-      imports = [
-        ./nix/packages.nix
-        ./nix/nixosModules.nix
-        ./nix/checks.nix
-        ./nix/devShell.nix
-      ];
+            shellHook = ''
+              export PATH="$PWD/bin:$PATH"
+              echo "Hermes Common Lisp Development Environment"
+              echo "Run './build.sh' to compile the agent."
+            '';
+          };
+        });
     };
 }

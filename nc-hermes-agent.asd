@@ -10,12 +10,21 @@
                "bordeaux-threads"
                "lparallel"
                "str"
-               "alexandria")
+               "alexandria"
+               "hunchentoot")
   :components ((:module "src"
                 :components
                 ((:file "config")
-                 (:file "agent" :depends-on ("config"))
-                 (:file "main" :depends-on ("agent")))))
+                 (:file "state")
+                 (:file "tools")
+                 (:file "skills" :depends-on ("tools"))
+                 (:file "core-tools" :depends-on ("skills" "tools"))
+                 (:file "llm" :depends-on ("config" "state"))
+                 (:file "mcp" :depends-on ("config" "tools"))
+                 (:file "agent" :depends-on ("config" "state" "llm" "tools" "skills" "core-tools"))
+                 (:file "gateway" :depends-on ("config" "agent" "state"))
+                 (:file "cli" :depends-on ("agent"))
+                 (:file "main" :depends-on ("agent" "gateway" "cli")))))
   :in-order-to ((test-op (test-op "nc-hermes-agent/tests"))))
 
 (defsystem "nc-hermes-agent/tests"

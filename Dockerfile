@@ -1,20 +1,41 @@
-FROM debian:13.4
+# Stage 1: Build the native SBCL binary
+FROM debian:bookworm-slim as builder
 
-RUN apt-get update
-RUN apt-get install -y nodejs npm python3 python3-pip ripgrep ffmpeg gcc python3-dev libffi-dev
+# Install build dependencies
+RUN apt-get update && apt-get install -y sbcl curl make git ca-certificates
 
-COPY . /opt/hermes
-WORKDIR /opt/hermes
+# Setup Quicklisp
+RUN curl -O https://beta.quicklisp.org/quicklisp.lisp && \
+    cat << 'QLEOF' > install-ql.lisp
+(load "quicklisp.lisp")
+(quicklisp-quickstart:install)
+(ql:add-to-init-file)
+(quit)
+QLEOF
+RUN sbcl --no-userinit --no-sysinit --load install-ql.lisp < /dev/null
 
-RUN pip install -e ".[all]" --break-system-packages
-RUN npm install
-RUN npx playwright install --with-deps chromium
-WORKDIR /opt/hermes/scripts/whatsapp-bridge
-RUN npm install
+WORKDIR /app
+COPY . /app
 
-WORKDIR /opt/hermes
-RUN chmod +x /opt/hermes/docker/entrypoint.sh
+# Run the build script
+RUN ./build.sh
 
-ENV HERMES_HOME=/opt/data
-VOLUME [ "/opt/data" ]
-ENTRYPOINT [ "/opt/hermes/docker/entrypoint.sh" ]
+# Stage 2: Minimal runtime environment
+FROM debian:bookworm-slim
+
+# Install runtime dependencies for the Lisp image (like OpenSSL for Dexador)
+RUN apt-get update && apt-get install -y libssl-dev ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the generated standalone executable
+COPY --from=builder /app/bin/hermes-agent /usr/local/bin/hermes-agent
+COPY config.example.lisp /app/config.example.lisp
+
+ENV HERMES_CONFIG="/app/config.example.lisp"
+
+# Expose Gateway Port
+EXPOSE 8080
+
+ENTRYPOINT ["/usr/local/bin/hermes-agent"]

@@ -1,5 +1,5 @@
 (defpackage :nc-hermes-agent.agent
-  (:use :cl :nc-hermes-agent.config)
+  (:use :cl :nc-hermes-agent.config :nc-hermes-agent.state :nc-hermes-agent.llm :nc-hermes-agent.tools)
   (:export :start-agent
            :stop-agent
            :agent-loop))
@@ -24,9 +24,10 @@
 (defun agent-loop ()
   "The core processing loop of the agent."
   (log-msg :info "Agent loop started.")
-  (loop while *agent-running* do
-    (log-msg :debug "Agent tick...")
-    (sleep 1))
+  (let ((state (make-agent-state)))
+    (loop while *agent-running* do
+      (log-msg :debug "Agent tick...")
+      (sleep 1)))
   (log-msg :info "Agent loop stopped."))
 
 (defun start-agent ()

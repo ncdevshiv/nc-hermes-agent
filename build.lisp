@@ -18,4 +18,5 @@
 (format t "Saving executable...~%")
 (sb-ext:save-lisp-and-die "bin/hermes-agent"
                           :toplevel #'nc-hermes-agent.main:main
-                          :executable t)
+                          :executable t
+                          :save-runtime-options t)
