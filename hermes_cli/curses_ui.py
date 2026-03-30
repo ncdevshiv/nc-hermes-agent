@@ -103,6 +103,12 @@ def curses_checklist(
                     result_holder[0] = cancel_returns
                     return
 
+        import platform
+        if platform.system() == "Windows":
+            # Enable ANSI escape sequences for Windows console
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
         curses.wrapper(_draw)
         return result_holder[0] if result_holder[0] is not None else cancel_returns
 

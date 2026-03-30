@@ -428,6 +428,12 @@ def _curses_prompt_choice(question: str, choices: list, default: int = 0) -> int
                 elif key in (27, ord("q")):
                     return
 
+        import platform
+        if platform.system() == "Windows":
+            # Enable ANSI escape sequences for Windows console
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
         curses.wrapper(_curses_menu)
         return result_holder[0]
     except Exception:

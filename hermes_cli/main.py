@@ -362,6 +362,12 @@ def _session_browse_picker(sessions: list) -> Optional[str]:
                     cursor = 0
                     scroll_offset = 0
 
+        import platform
+        if platform.system() == "Windows":
+            # Enable ANSI escape sequences for Windows console
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
         curses.wrapper(_curses_browse)
         return result_holder[0]
 
