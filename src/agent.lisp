@@ -21,16 +21,17 @@
     (when (>= (log-level-weight level) (log-level-weight config-level))
       (format t "[~a] ~a~%" level (apply #'format nil message args)))))
 
-(defun agent-loop ()
+(defun agent-loop (&optional initial-state)
   "The core processing loop of the agent."
   (log-msg :info "Agent loop started.")
-  (let ((state (make-agent-state)))
-    (loop while *agent-running* do
-      (log-msg :debug "Agent tick...")
-      (sleep 1)))
+  (let ((state (or initial-state (make-agent-state))))
+    (let ((nc-hermes-agent.core-tools::*current-agent-state* state))
+      (loop while *agent-running* do
+        (log-msg :debug "Agent tick...")
+        (sleep 1))))
   (log-msg :info "Agent loop stopped."))
 
-(defun start-agent ()
+(defun start-agent (&optional initial-state)
   "Starts the Hermes agent."
   (if *agent-running*
       (log-msg :warn "Agent is already running.")
@@ -41,7 +42,7 @@
               do (let ((init-fn (gethash skill-name nc-hermes-agent.skills::*skill-registry*)))
                    (when init-fn (funcall init-fn))))
         (setf *agent-running* t)
-        (bordeaux-threads:make-thread #'agent-loop :name "hermes-agent-loop"))))
+        (bordeaux-threads:make-thread (lambda () (agent-loop initial-state)) :name "hermes-agent-loop"))))
 
 (defun stop-agent ()
   "Signals the agent to stop running."

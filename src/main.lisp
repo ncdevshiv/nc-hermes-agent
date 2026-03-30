@@ -15,16 +15,26 @@
 
 (defun main ()
   "Entry point for the compiled executable."
-  (parse-args (uiop:command-line-arguments))
-  (format t "Initializing Hermes Lisp Agent...~%")
-  (load-system-config)
-  (start-agent)
-  (start-gateway)
-  (format t "Press Ctrl+C to exit.~%")
-  (handler-case
-      (loop (sleep 1))
-    (sb-sys:interactive-interrupt ()
-      (stop-agent)
-      (stop-gateway)
-      (format t "~%Shutting down gracefully.~%")
-      (uiop:quit 0))))
+  (let* ((resume-file (parse-args (uiop:command-line-arguments)))
+         (initial-state nil))
+    (format t "Initializing Hermes Lisp Agent...~%")
+    (load-system-config)
+
+    (when resume-file
+      (handler-case
+          (setf initial-state (nc-hermes-agent.state:load-checkpoint resume-file))
+        (error (e)
+          (format *error-output* "Failed to load checkpoint: ~A~%" e)
+          (uiop:quit 1))))
+
+    (start-agent initial-state)
+    (start-gateway)
+    (format t "Press Ctrl+C to exit.~%")
+
+    (handler-case
+        (loop (sleep 1))
+      (sb-sys:interactive-interrupt ()
+        (stop-agent)
+        (stop-gateway)
+        (format t "~%Shutting down gracefully.~%")
+        (uiop:quit 0)))))

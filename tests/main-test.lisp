@@ -28,3 +28,25 @@
 
       (stop-agent)
       (ok (null nc-hermes-agent.agent::*agent-running*) "Agent should stop after stop-agent"))))
+
+(deftest test-checkpoints
+  (testing "State saving and loading from JSON checkpoints"
+    (let* ((temp-file "test-checkpoint.json")
+           (state (nc-hermes-agent.state:make-agent-state)))
+      (nc-hermes-agent.state:add-message state "user" "Hello Lisp!")
+      (nc-hermes-agent.state:add-message state "assistant" "Hi!")
+
+      (ok (= (length (nc-hermes-agent.state:get-messages state)) 2) "Should have 2 messages")
+
+      (nc-hermes-agent.state:save-checkpoint state temp-file)
+      (ok (probe-file temp-file) "Checkpoint file should exist")
+
+      (let ((loaded-state (nc-hermes-agent.state:load-checkpoint temp-file)))
+        (ok (= (length (nc-hermes-agent.state:get-messages loaded-state)) 2) "Loaded state should have 2 messages")
+        ;; Shasht deserializes JSON arrays into Lisp vectors by default, so we coerce it back or access it as an array
+        (let* ((msgs (nc-hermes-agent.state:get-messages loaded-state))
+               (first-msg (if (vectorp msgs) (aref msgs 0) (first msgs))))
+          (ok (equal (gethash "role" first-msg) "user") "Role should match")
+          (ok (equal (gethash "content" first-msg) "Hello Lisp!") "Content should match")))
+
+      (delete-file temp-file))))
