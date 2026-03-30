@@ -1,5 +1,5 @@
 (defpackage :nc-hermes-agent.agent
-  (:use :cl :nc-hermes-agent.config :nc-hermes-agent.state :nc-hermes-agent.llm :nc-hermes-agent.tools)
+  (:use :cl :nc-hermes-agent.config :nc-hermes-agent.state :nc-hermes-agent.llm :nc-hermes-agent.tools :nc-hermes-agent.skills :nc-hermes-agent.core-tools :nc-hermes-agent.file-tools :nc-hermes-agent.web-tools :nc-hermes-agent.mcp-client)
   (:export :start-agent
            :stop-agent
            :agent-loop))
@@ -36,6 +36,10 @@
       (log-msg :warn "Agent is already running.")
       (progn
         (log-msg :info "Starting Hermes Agent version ~a" (get-config-value :version "unknown"))
+        ;; Initialize all registered skill modules (this includes tools and mcp-clients)
+        (loop for skill-name in (get-active-skills)
+              do (let ((init-fn (gethash skill-name nc-hermes-agent.skills::*skill-registry*)))
+                   (when init-fn (funcall init-fn))))
         (setf *agent-running* t)
         (bordeaux-threads:make-thread #'agent-loop :name "hermes-agent-loop"))))
 
