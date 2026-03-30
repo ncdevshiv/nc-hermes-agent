@@ -1,5 +1,5 @@
 (defpackage :nc-hermes-agent.agent
-  (:use :cl :nc-hermes-agent.config :nc-hermes-agent.state :nc-hermes-agent.llm :nc-hermes-agent.tools :nc-hermes-agent.skills :nc-hermes-agent.core-tools :nc-hermes-agent.file-tools :nc-hermes-agent.web-tools :nc-hermes-agent.mcp-client)
+  (:use :cl :nc-hermes-agent.config :nc-hermes-agent.state :nc-hermes-agent.llm :nc-hermes-agent.tools :nc-hermes-agent.skills :nc-hermes-agent.core-tools :nc-hermes-agent.file-tools :nc-hermes-agent.web-tools :nc-hermes-agent.search-tools :nc-hermes-agent.github-tools :nc-hermes-agent.mcp-client :nc-hermes-agent.trajectory)
   (:export :start-agent
            :stop-agent
            :agent-loop))
@@ -28,6 +28,8 @@
     (let ((nc-hermes-agent.core-tools::*current-agent-state* state))
       (loop while *agent-running* do
         (log-msg :debug "Agent tick...")
+        ;; Simulated tick action
+        (nc-hermes-agent.trajectory:log-action (nc-hermes-agent.state::agent-id state) "system" "Tick processed")
         (sleep 1))))
   (log-msg :info "Agent loop stopped."))
 

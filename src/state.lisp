@@ -9,7 +9,9 @@
 (in-package :nc-hermes-agent.state)
 
 (defclass agent-state ()
-  ((messages :initarg :messages
+  ((id :initform (format nil "state-~A" (get-universal-time))
+       :accessor agent-id)
+   (messages :initarg :messages
              :initform nil
              :accessor agent-messages
              :documentation "List of message alists (role and content).")

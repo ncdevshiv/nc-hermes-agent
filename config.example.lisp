@@ -6,4 +6,5 @@
  (:api-endpoint . "http://localhost:8080/api")
  (:log-level . :info)
  (:mcp-servers . (((:name . "sqlite")
-                   (:command . "npx @modelcontextprotocol/server-sqlite --db hermes.db")))))
+                   (:command . "npx @modelcontextprotocol/server-sqlite --db hermes.db"))))
+ (:trajectory-log-file . "trajectories.jsonl"))
