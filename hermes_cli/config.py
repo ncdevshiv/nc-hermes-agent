@@ -135,6 +135,7 @@ def ensure_hermes_home():
 
 DEFAULT_CONFIG = {
     "model": "anthropic/claude-opus-4.6",
+    "fallback_providers": [],
     "toolsets": ["hermes-cli"],
     "agent": {
         "max_turns": 90,
@@ -426,6 +427,12 @@ DEFAULT_CONFIG = {
             "domains": [],
             "shared_files": [],
         },
+    },
+
+    "cron": {
+        # Wrap delivered cron responses with a header (task name) and footer
+        # ("The agent cannot see this message").  Set to false for clean output.
+        "wrap_response": True,
     },
 
     # Config schema version - bump this when adding new required fields
