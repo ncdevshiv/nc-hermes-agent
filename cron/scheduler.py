@@ -87,6 +87,22 @@ def _resolve_delivery_target(job: dict) -> Optional[dict]:
             chat_id, thread_id = rest.split(":", 1)
         else:
             chat_id, thread_id = rest, None
+
+        # Resolve human-friendly labels like "Alice (dm)" to real IDs.
+        # send_message(action="list") shows labels with display suffixes
+        # that aren't valid platform IDs (e.g. WhatsApp JIDs).
+        try:
+            from gateway.channel_directory import resolve_channel_name
+            target = chat_id
+            # Strip display suffix like " (dm)" or " (group)"
+            if target.endswith(")") and " (" in target:
+                target = target.rsplit(" (", 1)[0].strip()
+            resolved = resolve_channel_name(platform_name.lower(), target)
+            if resolved:
+                chat_id = resolved
+        except Exception:
+            pass
+
         return {
             "platform": platform_name,
             "chat_id": chat_id,
@@ -146,6 +162,8 @@ def _deliver_result(job: dict, content: str) -> None:
         "mattermost": Platform.MATTERMOST,
         "homeassistant": Platform.HOMEASSISTANT,
         "dingtalk": Platform.DINGTALK,
+        "feishu": Platform.FEISHU,
+        "wecom": Platform.WECOM,
         "email": Platform.EMAIL,
         "sms": Platform.SMS,
     }
@@ -320,7 +338,7 @@ def run_job(job: dict) -> tuple[bool, str, str, Optional[str]]:
             if delivery_target.get("thread_id") is not None:
                 os.environ["HERMES_CRON_AUTO_DELIVER_THREAD_ID"] = str(delivery_target["thread_id"])
 
-        model = job.get("model") or os.getenv("HERMES_MODEL") or "anthropic/claude-opus-4.6"
+        model = job.get("model") or os.getenv("HERMES_MODEL") or ""
 
         # Load config.yaml for model, reasoning, prefill, toolsets, provider routing
         _cfg = {}
